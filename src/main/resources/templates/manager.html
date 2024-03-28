@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html
+    lang="en"
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
+        <title>Manager</title>
+
+        <!-- General CSS Files -->
+        <link rel="stylesheet" th:href="@{/stisla/dist/assets/modules/bootstrap/css/bootstrap.min.css}">
+        <link rel="stylesheet" th:href="@{/stisla/dist/assets/modules/fontawesome/css/all.min.css}">
+
+        <!-- CSS Libraries -->
+        <link rel="stylesheet" th:href="@{/stisla/dist/assets/modules/datatables/datatables.min.css}">
+        <link rel="stylesheet" th:href="@{/stisla/dist/assets/modules/datatables/DataTables-1.10.16/css/dataTables.bootstrap4.min.css}">
+        <link rel="stylesheet" th:href="@{/stisla/dist/assets/modules/datatables/Select-1.2.4/css/select.bootstrap4.min.css}">
+        <link rel="stylesheet" th:href="@{/stisla/dist/assets/modules/bootstrap-daterangepicker/daterangepicker.css}">
+        <link rel="stylesheet" th:href="@{/stisla/dist/assets/modules/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.min.css}">
+        <link rel="stylesheet" th:href="@{/stisla/dist/assets/modules/bootstrap-timepicker/css/bootstrap-timepicker.min.css}">
+        <link rel="stylesheet" th:href="@{/stisla/dist/assets/modules/bootstrap-tagsinput/dist/bootstrap-tagsinput.css}">
+
+        <!-- Template CSS -->
+        <link rel="stylesheet" th:href="@{/stisla/dist/assets/css/style.css}">
+        <link rel="stylesheet" th:href="@{/stisla/dist/assets/css/components.css}">
+
+        <!-- Start GA -->
+        <script async th:src="@{https://www.googletagmanager.com/gtag/js?id=UA-94034622-3}"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+                dataLayer.push(arguments);
+            }
+            gtag('js', new Date());
+
+            gtag('config', 'UA-94034622-3');
+        </script>
+        <!-- /END GA -->
+
+    </head>
+
+    <body class="sidebar-mini">
+        <div id="app">
+            <div class="main-wrapper main-wrapper-1">
+                <div class="navbar-bg"></div>
+                <nav class="navbar navbar-expand-lg main-navbar">
+                    <form class="form-inline mr-auto">
+                        <ul class="navbar-nav mr-3">
+                            <li><a href="#" data-toggle="sidebar" class="nav-link nav-link-lg"><i class="fas fa-bars"></i></a></li>
+                        </ul>
+                    </form>
+
+                    <ul class="navbar-nav navbar-right">
+                        <li th:if="${loggedUser} != null" class="dropdown">
+                            <a href="#" data-toggle="dropdown" class="nav-link dropdown-toggle nav-link-lg nav-link-user">
+                                <div th:text="${loggedUser.firstName} + ' ' + ${loggedUser.lastName}" class="d-sm-none d-lg-inline-block">Full name</div>
+                            </a>
+
+                            <form th:action="@{/logout}" method="POST">
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <div class="dropdown-divider"></div>
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="fas fa-sign-out-alt"></i> Logout
+                                    </button>
+                                </div>
+                            </form>
+                        </li>
+
+                        <li th:if="${loggedUser} == null" class="dropdown">
+                            <a href="#" data-toggle="dropdown" class="nav-link dropdown-toggle nav-link-lg nav-link-user">
+                                <div th:text="'Anonymous'" class="d-sm-none d-lg-inline-block">Anonymous</div>
+                            </a>
+
+                            <form th:action="@{/login}" method="GET">
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <div class="dropdown-divider"></div>
+                                    <button type="submit" class="dropdown-item text-primary">
+                                        <i class="fas fa-sign-in-alt"></i> Login
+                                    </button>
+                                </div>
+                            </form>
+                        </li>
+                    </ul>
+                </nav>
+
+                <div class="main-sidebar sidebar-style-2">
+                    <aside id="sidebar-wrapper">
+                        <div class="sidebar-brand">
+                            <a th:href="@{/home}">Role Manager</a>
+                        </div>
+                        <div class="sidebar-brand sidebar-brand-sm">
+                            <a th:href="@{/home}">RM</a>
+                        </div>
+                        <ul class="sidebar-menu">
+                            <li class="active">
+                                <a th:href="@{/manager}" class="nav-link"><i class="fas fa-edit"></i> <span>Manager</span></a>
+                            </li>
+                        </ul>
+                    </aside>
+                </div>
+
+                <!-- Main Content -->
+                <div class="main-content">
+                    <section class="section">
+                        <div class="section-header">
+                            <h1>Manager</h1>
+                        </div>
+
+                        <div class="section-body">
+
+                            <div class="row">
+                                <div class="col-12">
+
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h4>Users</h4>
+                                        </div>
+
+                                        <div sec:authorize="hasAnyRole('ADMIN' , 'CREATOR')" class="card-body">
+                                            <a href="#" data-toggle="modal" data-target="#userDataModel" class="btn btn-icon icon-left btn-outline-primary col-12"><i class="fas fa-user-plus"></i>Create</a>
+                                        </div>
+
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+
+                                                <table class="table" id="table-1">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>User ID</th>
+                                                            <th>First name</th>
+                                                            <th>Last name</th>
+                                                            <th>Status</th>
+                                                            <th>Roles</th>
+                                                            <th sec:authorize="hasAnyRole('ADMIN', 'DELETER', 'UPDATER')">
+                                                                Actions
+                                                            </th>
+                                                            <th sec:authorize="hasAnyRole('ADMIN', 'UPDATER')" hidden="">
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr th:each="userItem : ${listUsers}">
+                                                            <td th:text="${userItem.userId}">userId</td>
+                                                            <td th:text="${userItem.firstName}">firstName</td>
+                                                            <td th:text="${userItem.lastName}">lastName</td>
+                                                            <td th:text="${userItem.status}">status</td>
+                                                            <td th:text="${userItem.roles}">roles</td>
+                                                            <td sec:authorize="hasAnyRole('ADMIN', 'DELETER', 'UPDATER')">
+                                                                <a sec:authorize="hasAnyRole('ADMIN', 'UPDATER')" href="#" data-toggle="modal" th:attr="data-target='#userDataModel' + ${userItem.userId}" class="btn btn-icon icon-left btn-outline-primary"><i class="fas fa-user-edit"></i>Edit</a>
+                                                                <a sec:authorize="hasAnyRole('ADMIN', 'DELETER')" th:href="@{'/delete/' + ${userItem.userId}}" class="btn btn-icon icon-left btn-outline-danger"><i class="fas fa-user-minus"></i>Delete</a>
+                                                            </td>
+                                                            <td sec:authorize="hasAnyRole('ADMIN', 'UPDATER')">
+                                                                <div th:attr="id='userDataModel' + ${userItem.userId}" class="modal fade" tabindex="-1" role="dialog" data-backdrop="false">
+                                                                    <div class="modal-dialog" role="document">
+                                                                        <div class="modal-content">
+
+                                                                            <form th:action="@{/update}" method="POST" class="needs-validation" novalidate="">
+                                                                                <div class="modal-header">
+                                                                                    <h5 class="modal-title">Update user</h5>
+                                                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                                        <span aria-hidden="true">&times;</span>
+                                                                                    </button>
+                                                                                </div>
+                                                                                <div class="modal-body">
+
+                                                                                    <input th:value="${userItem.userId}" name="userId" type="hidden" class="form-control" required="">
+
+                                                                                    <div class="form-group">
+                                                                                        <label>First name</label>
+                                                                                        <input th:value="${userItem.firstName}" name="firstName" type="text" class="form-control" required="">
+                                                                                        <div class="invalid-feedback">
+                                                                                            First name is required!
+                                                                                        </div>
+                                                                                    </div>
+
+                                                                                    <div class="form-group">
+                                                                                        <label>Last name</label>
+                                                                                        <input th:value="${userItem.lastName}" name="lastName" type="text" class="form-control" required="">
+                                                                                        <div class="invalid-feedback">
+                                                                                            Last name is required!
+                                                                                        </div>
+                                                                                    </div>
+
+                                                                                    <input th:value="${userItem.username}" name="username" type="hidden" class="form-control" required="">
+
+                                                                                    <input th:value="${userItem.password}" name="password" type="hidden" class="form-control" required="">
+
+                                                                                    <div class="form-group">
+                                                                                        <label>Status</label>
+                                                                                        <div class="custom-control custom-checkbox">
+                                                                                            <input th:checked="${userItem.active}" th:id="${userItem.username} + 'Active'" name="active" type="checkbox" class="custom-control-input">
+                                                                                            <label th:text="'Active'" th:for="${userItem.username} + 'Active'" class="custom-control-label">Active</label>
+                                                                                        </div>
+                                                                                    </div>
+
+                                                                                    <div class="form-group">
+                                                                                        <label>Roles</label>
+                                                                                        <div th:each="roleItem : ${listRoles}" class="custom-control custom-checkbox">
+                                                                                            <input th:checked="${userItem.roles.contains(roleItem)}" th:value="${roleItem.roleId}" th:id="${userItem.username} + 'Role' + ${roleItem.roleId}" name="roles" type="checkbox" class="custom-control-input">
+                                                                                            <label th:text="${roleItem}" th:for="${userItem.username} + 'Role' + ${roleItem.roleId}" class="custom-control-label">Roles</label>
+                                                                                        </div>
+                                                                                    </div>
+
+                                                                                </div>
+                                                                                <div class="modal-footer bg-whitesmoke br">
+                                                                                    <button type="button" class="btn btn-icon icon-left btn-secondary" data-dismiss="modal"><i class="fas fa-window-close"></i>Cancel</button>
+                                                                                    <button type="submit" class="btn btn-icon icon-left btn-primary"><i class="fas fa-user-edit"></i>Update</button>
+                                                                                </div>
+                                                                            </form>
+
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div id="userDataModel" class="modal fade" tabindex="-1" role="dialog" data-backdrop="false">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+
+                                <form th:action="@{/create}" method="POST" class="needs-validation" novalidate="">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Create user</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+
+                                        <input name="userId" type="hidden" value="0" class="form-control" required="">
+
+                                        <div class="form-group">
+                                            <label>First name</label>
+                                            <input name="firstName" type="text" class="form-control" required="">
+                                            <div class="invalid-feedback">
+                                                First name is required!
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Last name</label>
+                                            <input name="lastName" type="text" class="form-control" required="">
+                                            <div class="invalid-feedback">
+                                                Last name is required!
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Username</label>
+                                            <input name="username" type="text" class="form-control" required="">
+                                            <div class="invalid-feedback">
+                                                Username is required!
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Password</label>
+                                            <input name="password" type="password" class="form-control" required="">
+                                            <div class="invalid-feedback">
+                                                Password is required!
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Status</label>
+                                            <div class="custom-control custom-checkbox">
+                                                <input name="active" th:id="'active'" type="checkbox" class="custom-control-input">
+                                                <label th:text="'Active'" class="custom-control-label" th:for="'active'">Active</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Roles</label>
+                                            <div th:each="roleItem : ${listRoles}" class="custom-control custom-checkbox">
+                                                <input name="roles" th:value="${roleItem.roleId}" th:id="'role' + ${roleItem.roleId}" type="checkbox" class="custom-control-input">
+                                                <label th:text="${roleItem}" th:for="'role' + ${roleItem.roleId}" class="custom-control-label">Roles</label>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="modal-footer bg-whitesmoke br">
+                                        <button type="button" class="btn btn-icon icon-left btn-secondary" data-dismiss="modal"><i class="fas fa-window-close"></i>Close</button>
+                                        <button type="submit" class="btn btn-icon icon-left btn-primary"><i class="fas fa-user-plus"></i>Create</button>
+                                    </div>
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <footer class="main-footer">
+                    <div class="footer-left">
+
+                    </div>
+                    <div class="footer-right">
+
+                    </div>
+                </footer>
+            </div>
+        </div>
+
+        <!-- General JS Scripts -->
+        <script th:src="@{/stisla/dist/assets/modules/jquery.min.js}"></script>
+        <script th:src="@{/stisla/dist/assets/modules/popper.js}"></script>
+        <script th:src="@{/stisla/dist/assets/modules/tooltip.js}"></script>
+        <script th:src="@{/stisla/dist/assets/modules/bootstrap/js/bootstrap.min.js}"></script>
+        <script th:src="@{/stisla/dist/assets/modules/nicescroll/jquery.nicescroll.min.js}"></script>
+        <script th:src="@{/stisla/dist/assets/modules/moment.min.js}"></script>
+        <script th:src="@{/stisla/dist/assets/js/stisla.js}"></script>
+
+        <!-- JS Libraies -->
+        <script th:src="@{/stisla/dist/assets/modules/datatables/datatables.min.js}"></script>
+        <script th:src="@{/stisla/dist/assets/modules/datatables/DataTables-1.10.16/js/dataTables.bootstrap4.min.js}"></script>
+        <script th:src="@{/stisla/dist/assets/modules/datatables/Select-1.2.4/js/dataTables.select.min.js}"></script>
+        <script th:src="@{/stisla/dist/assets/modules/jquery-pwstrength/jquery.pwstrength.min.js}"></script>
+
+        <!-- Page Specific JS File -->
+        <script th:src="@{/stisla/dist/assets/js/page/modules-datatables.js}"></script>
+        <script th:src="@{/stisla/dist/assets/js/page/forms-advanced-forms.js}"></script>
+        <script th:src="@{/stisla/dist/assets/js/page/bootstrap-modal.js}"></script>
+
+        <!-- Template JS File -->
+        <script th:src="@{/stisla/dist/assets/js/scripts.js}"></script>
+        <script th:src="@{/stisla/dist/assets/js/custom.js}"></script>
+    </body>
+</html>
